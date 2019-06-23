@@ -11,7 +11,9 @@ import (
 var defaultTransport *http.Transport
 var client *http.Client
 
-var upgrader = websocket.Upgrader{ReadBufferSize: 0, WriteBufferSize: 0}
+var upgrader = websocket.Upgrader{ReadBufferSize: 0, WriteBufferSize: 0, CheckOrigin: func(r *http.Request) bool {
+	return true
+}}
 
 func main() {
 	port := "2222"
@@ -40,7 +42,7 @@ func main() {
 
 func ServeHTTP(wr http.ResponseWriter, r *http.Request) {
 
-	client, err := upgrader.Upgrade(wr, r, nil)
+	client, err := upgrader.Upgrade(wr, r, wr.Header())
 
 	defer client.Close()
 
@@ -50,7 +52,8 @@ func ServeHTTP(wr http.ResponseWriter, r *http.Request) {
 	}
 
 	for {
-		err := client.ReadJSON(&msg)
+		_, bytes, err := client.ReadMessage()
+		fmt.Println(string(bytes))
 		if err != nil {
 			fmt.Println("Can't read adx request" + err.Error())
 			return

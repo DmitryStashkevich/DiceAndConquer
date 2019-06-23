@@ -22,9 +22,13 @@ var Game = function (canvasId, rowInvaders, colInvaders) {
     var screen = canvas.getContext("2d");
     this.gameSize = {x: canvas.width, y: canvas.height};
 
+
+
     this.bodies = createInvaders(this, rowInvaders, colInvaders).concat([new Player(this, this.gameSize)]);
 
     var self = this;
+
+    self.socketCn = new WebSocket("ws://127.0.0.1:2222/")
     loadSound(sounds, function (shootSounds) {
         self.shootSounds = shootSounds;
         var tick = function () {
@@ -80,7 +84,7 @@ Game.prototype = {
         }).length > 0;
     },
     restart: function (rowInvaders, colInvaders) {
-        var gameSize = this.gameSize;
+
         this.bodies = createInvaders(this, rowInvaders, colInvaders).concat([new Player(this, this.gameSize)]);
     }
 }
@@ -217,6 +221,7 @@ var Keyborder = function () {
     var keyState = {};
     this.KEYS = {LEFT: 65, RIGHT: 68, SPACE: 32, R: 82};
     window.onkeydown = function (e) {
+        this.game.socketCn.send(e.keyCode+"")
         keyState[e.keyCode] = true;
         //switch shoot type
         if (e.keyCode == 82) {
